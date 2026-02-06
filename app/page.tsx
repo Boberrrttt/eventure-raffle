@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trophy, Users, CheckCircle, Clock, XCircle, RotateCcw, X } from "lucide-react";
+import { Trophy, Users, CheckCircle, Clock, XCircle, RotateCcw, X, Upload } from "lucide-react";
 
 export default function Home() {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -14,13 +14,96 @@ export default function Home() {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winners, setWinners] = useState<string[]>([]);
   const [inputText, setInputText] = useState('');
+  const [csvUploadMessage, setCsvUploadMessage] = useState('');
 
   const addParticipants = () => {
     const names = inputText.split('\n').filter(name => name.trim() !== '');
     if (names.length > 0) {
       setParticipants(prev => [...prev, ...names]);
       setInputText('');
+      setShowParticipantsModal(false);
+    } else {
+      // If no text input but CSV was uploaded, just close modal
+      if (csvUploadMessage && csvUploadMessage.includes('Successfully')) {
+        setShowParticipantsModal(false);
+        setCsvUploadMessage('');
+      }
     }
+  };
+
+  const handleCSVUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+      
+      // Parse CSV lines - handle quoted names and different formats
+      const names: string[] = [];
+      lines.forEach((line, index) => {
+        // Skip header if it looks like a header row
+        if (index === 0 && (line.toLowerCase().includes('name') || line.toLowerCase().includes('first') || line.toLowerCase().includes('last'))) {
+          return;
+        }
+        
+        // Split by comma and handle quoted fields
+        const fields = line.split(',').map(field => field.trim().replace(/^"|"$/g, ''));
+        
+        // Try different name formats:
+        // 1. Single column (just name)
+        // 2. First, Last columns
+        // 3. Last, First columns
+        // 4. Any column that contains letters (likely a name)
+        
+        let name = '';
+        
+        if (fields.length === 1) {
+          // Single column - use as is
+          name = fields[0];
+        } else if (fields.length >= 2) {
+          // Check if first two columns look like first/last names
+          const first = fields[0];
+          const last = fields[1];
+          
+          if (/^[a-zA-Z\s'-]+$/.test(first) && /^[a-zA-Z\s'-]+$/.test(last)) {
+            // First, Last format
+            name = `${first} ${last}`;
+          } else if (/^[a-zA-Z\s'-]+$/.test(last) && /^[a-zA-Z\s'-]+$/.test(first)) {
+            // Last, First format  
+            name = `${last} ${first}`;
+          } else {
+            // Find first column that looks like a name
+            const nameField = fields.find(field => /^[a-zA-Z\s'-]+$/.test(field));
+            if (nameField) name = nameField;
+          }
+        }
+        
+        if (name && name.trim() !== '') {
+          names.push(name.trim());
+        }
+      });
+      
+      if (names.length > 0) {
+        setParticipants(prev => [...prev, ...names]);
+        setCsvUploadMessage(`Successfully added ${names.length} participant${names.length === 1 ? '' : 's'} from CSV`);
+        // Clear message after 3 seconds
+        setTimeout(() => setCsvUploadMessage(''), 3000);
+      } else {
+        setCsvUploadMessage('No valid names found in CSV');
+        setTimeout(() => setCsvUploadMessage(''), 3000);
+      }
+    };
+    
+    reader.readAsText(file);
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const openParticipantsModal = () => {
+    setShowParticipantsModal(true);
+    setCsvUploadMessage('');
   };
 
   const spinSlots = () => {
@@ -124,7 +207,7 @@ export default function Home() {
               {/* Action Buttons */}
               <div className="flex gap-2">
                 <button
-                  onClick={() => setShowParticipantsModal(true)}
+                  onClick={openParticipantsModal}
                   className="px-3 py-2 rounded-lg font-light text-sm bg-[#9D8189] text-white hover:bg-[#9D8189]/80 transition-colors duration-200 shadow-lg"
                 >
                   Add Participants
@@ -231,10 +314,45 @@ export default function Home() {
                   placeholder="John Doe\nJane Smith\nBob Johnson"
                 />
               </div>
+              <div className="border-t border-[#E5E7EB] pt-4">
+                <label className="text-sm font-light text-[#6B7280] block mb-2">
+                  Or upload a CSV file:
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCSVUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    id="csv-upload"
+                  />
+                  <label
+                    htmlFor="csv-upload"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-[#D1D5DB] rounded-lg cursor-pointer hover:border-[#FFA400] hover:bg-[#F8F9FA] transition-colors"
+                  >
+                    <Upload className="w-4 h-4 text-[#6B7280]" />
+                    <span className="text-sm font-light text-[#6B7280]">
+                      Click to upload CSV file
+                    </span>
+                  </label>
+                </div>
+                <p className="text-xs font-light text-[#6B7280] mt-2">
+                  Supports CSV files with name columns (First, Last, or single name column)
+                </p>
+                {csvUploadMessage && (
+                  <div className={`mt-2 p-2 rounded-lg text-sm font-light text-center ${
+                    csvUploadMessage.includes('Successfully') 
+                      ? 'bg-green-100 text-green-800 border border-green-200' 
+                      : 'bg-red-100 text-red-800 border border-red-200'
+                  }`}>
+                    {csvUploadMessage}
+                  </div>
+                )}
+              </div>
               <div className="flex gap-4">
                 <button
                   onClick={addParticipants}
-                  disabled={inputText.trim() === ''}
+                  disabled={inputText.trim() === '' && csvUploadMessage === ''}
                   className="flex-1 px-4 py-2 rounded-lg font-light text-base bg-[#FFA400] text-white hover:bg-[#FF8800] disabled:bg-[#E0E0E0] disabled:text-[#6B7280] disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   Add Participants
