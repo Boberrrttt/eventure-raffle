@@ -158,13 +158,21 @@ export default function Home() {
       <div className="container mx-auto px-4 py-4">
         {/* Header */}
         <div className="text-center mb-4">
-          <div className="flex flex-col justify-center items-center mb-4">
+          <div className="flex flex-col gap-4 justify-center items-center mb-4">
             <img 
               src="/ordlabs/Secondary.png" 
               alt="Ordlabs" 
               className="h-12 w-auto mb-2"
             />
-            <p className="text-4xl font-normal tracking-wide text-[#1A1A1A]">Raffle Machine</p>
+            <hr className="border-[0.5px] border-gray-300 w-full" />
+            <div className="flex gap-2 items-end">
+              <img 
+                src="/LogoMark.svg" 
+                alt="Ordlabs" 
+                className="h-8 w-auto mb-1"
+              />
+              <p className="text-5xl font-semibold font-montserrat tracking-wide text-[#1A1A1A]">Raffle Machine</p>
+            </div>
           </div>
         </div>
 
