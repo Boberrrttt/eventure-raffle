@@ -1,17 +1,7 @@
 "use client";
 
-import {
-  CheckCircle,
-  Clock,
-  Expand,
-  RotateCcw,
-  Shrink,
-  Trophy,
-  Upload,
-  Users,
-  XCircle,
-} from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Trophy, Users, CheckCircle, Clock, XCircle, RotateCcw, X, Upload, Expand, Shrink } from "lucide-react";
 
 export default function Home() {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -24,30 +14,22 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [participants, setParticipants] = useState<string[]>([]);
   const [winners, setWinners] = useState<string[]>([]);
-  const [inputText, setInputText] = useState("");
-  const [csvUploadMessage, setCsvUploadMessage] = useState("");
+  const [inputText, setInputText] = useState('');
+  const [csvUploadMessage, setCsvUploadMessage] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
-      document.documentElement
-        .requestFullscreen?.()
-        .then(() => setIsFullscreen(true))
-        .catch(() => {});
+      document.documentElement.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
     } else {
-      document
-        .exitFullscreen?.()
-        .then(() => setIsFullscreen(false))
-        .catch(() => {});
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
     }
   }, []);
 
   useEffect(() => {
-    const handleFullscreenChange = () =>
-      setIsFullscreen(!!document.fullscreenElement);
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
   const addParticipants = () => {
@@ -238,7 +220,7 @@ export default function Home() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowAllParticipantsModal(true)}
-                  className="flex items-center gap-1 px-3 py-1 bg-[#F8F9FA] rounded-full border border-[#D1D5DB] hover:bg-[#E5E7EB] transition-colors"
+                  className="flex items-center gap-1 px-3 py-1 bg-[#F8F9FA] rounded-full border border-[#D1D5DB] hover:bg-[#E5E7EB] transition-colors cursor-pointer"
                 >
                   <Users className="w-3 h-3 text-[#6B7280]" />
                   <span className="text-xs font-light text-[#1A1A1A]">
@@ -290,22 +272,18 @@ export default function Home() {
                   aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                   title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                 >
-                  {isFullscreen ? (
-                    <Shrink className="w-4 h-4" />
-                  ) : (
-                    <Expand className="w-4 h-4" />
-                  )}
+                  {isFullscreen ? <Shrink className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={openParticipantsModal}
-                  className="px-3 py-2 rounded-lg font-light text-sm bg-[#9D8189] text-white hover:bg-[#9D8189]/80 transition-colors duration-200 shadow-lg"
+                  className="px-3 py-2 rounded-lg font-light text-sm bg-[#9D8189] text-white hover:bg-[#9D8189]/80 transition-colors duration-200 shadow-lg cursor-pointer"
                 >
                   Add Participants
                 </button>
                 {participants.length === 0 && (
                   <button
                     onClick={resetRaffle}
-                    className="p-2 rounded-lg font-light text-sm bg-[#9D8189] text-white hover:bg-[#9D8189]/80 transition-colors duration-200 shadow-lg"
+                    className="p-2 rounded-lg font-light text-sm bg-[#9D8189] text-white hover:bg-[#9D8189]/80 transition-colors duration-200 shadow-lg cursor-pointer"
                     aria-label="Reset"
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -346,8 +324,8 @@ export default function Home() {
                 disabled={isSpinning || participants.length === 0}
                 className={`px-12 py-4 rounded-2xl font-light text-lg transition-all duration-300 transform tracking-wide ${
                   isSpinning || participants.length === 0
-                    ? "bg-[#E0E0E0] text-[#6B7280] cursor-not-allowed scale-95"
-                    : "bg-gradient-to-r from-[#FFA400] to-[#FF8800] text-white hover:from-[#FF8800] hover:to-[#FFA400] hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl cursor-pointer"
+                    ? 'bg-[#E0E0E0] text-[#6B7280] cursor-not-allowed scale-95'
+                    : 'bg-gradient-to-r from-[#FFA400] to-[#FF8800] text-white hover:from-[#FF8800] hover:to-[#FFA400] hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl cursor-pointer'
                 }`}
               >
                 {isSpinning
@@ -402,7 +380,7 @@ export default function Home() {
               </h3>
               <button
                 onClick={() => setShowParticipantsModal(false)}
-                className="text-[#6B7280] hover:text-[#1A1A1A] transition-colors"
+                className="text-[#6B7280] hover:text-[#1A1A1A] transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -465,13 +443,13 @@ export default function Home() {
               <div className="flex gap-4">
                 <button
                   onClick={addParticipants}
-                  disabled={inputText.trim() === "" && csvUploadMessage === ""}
+                  disabled={inputText.trim() === '' && csvUploadMessage === ''}
                   className="flex-1 px-4 py-2 rounded-lg font-light text-base bg-[#FFA400] text-white hover:bg-[#FF8800] disabled:bg-[#E0E0E0] disabled:text-[#6B7280] disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
                 >
                   Add Participants
                 </button>
                 <button
-                  onClick={() => setInputText("")}
+                  onClick={() => setInputText('')}
                   className="px-4 py-2 rounded-lg font-light text-base bg-[#9D8189] text-white hover:bg-[#9D8189]/80 transition-colors duration-200 cursor-pointer"
                 >
                   Clear
@@ -496,7 +474,7 @@ export default function Home() {
               </h3>
               <button
                 onClick={() => setShowAllParticipantsModal(false)}
-                className="text-[#6B7280] hover:text-[#1A1A1A] transition-colors"
+                className="text-[#6B7280] hover:text-[#1A1A1A] transition-colors cursor-pointer"
               >
                 ✕
               </button>
